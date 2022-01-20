@@ -11,11 +11,13 @@ type subscribeT struct {
 	Subscriber  string `json:"subscriber"`
 	PreAproved  string `json:"pre_approved"`
 	PreVerified string `json:"pre_verified"`
-	//PreConfirmed string `json:"pre_confirmed"`		// 400
-	//DisplayName  string `json:"display_name"`		// 400
-	//SendWelcome    string `json:"send_welcome_message"`	// 400
-	//DeliveryMode   string `json:"delivery_mode"`		// 400
-	//DeliveryStatus string `json:"delivery_status"`	// 400
+}
+
+type subscribeTbool struct {
+	ListID      string `json:"list_id"`
+	Subscriber  string `json:"subscriber"`
+	PreAproved  bool   `json:"pre_approved"`
+	PreVerified bool   `json:"pre_verified"`
 }
 
 var (
@@ -24,6 +26,8 @@ var (
 )
 
 func sSetup() (listId, userId string) {
+	setDomain()
+
 	if flag.NArg() < 2 {
 		fmt.Println("subscribe/unsubscribe requires a list and an email address")
 		usage()
@@ -71,18 +75,23 @@ func sSetup() (listId, userId string) {
 func subscribeCmd() {
 	listId, userId := sSetup()
 
-	var subscribeStruct subscribeT
-	subscribeStruct.ListID = listId
-	subscribeStruct.Subscriber = userId
-	subscribeStruct.PreAproved = "true"
-	subscribeStruct.PreVerified = "true"
-	//subscribeStruct.PreConfirmed = "true"
-	//subscribeStruct.DisplayName = "Display Name Foo"
-	//subscribeStruct.SendWelcome = "false"
-	//subscribeStruct.DeliveryMode = "regular"
-	//subscribeStruct.DeliveryStatus = "by_user"
+	if flagb {
+		var subscribeStruct subscribeTbool
+		subscribeStruct.ListID = listId
+		subscribeStruct.Subscriber = userId
+		subscribeStruct.PreAproved = true
+		subscribeStruct.PreVerified = true
 
-	post(configuration.Url+"/members", subscribeStruct)
+		post(configuration.Url+"/members", subscribeStruct)
+	} else {
+		var subscribeStruct subscribeT
+		subscribeStruct.ListID = listId
+		subscribeStruct.Subscriber = userId
+		subscribeStruct.PreAproved = "true"
+		subscribeStruct.PreVerified = "true"
+
+		post(configuration.Url+"/members", subscribeStruct)
+	}
 	log.Printf("user %s subscribed to list %s", address, list)
 }
 
